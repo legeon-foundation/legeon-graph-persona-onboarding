@@ -5,6 +5,8 @@ sequenceDiagram
     participant C as Consultant
     participant FE as Legeon dApp (Frontend)
     participant BE as Backend Services
+    participant TLE as Talent Liquidity Engine
+    participant REP as Reputation Service
     participant DB as Postgres and Encrypted Storage
     participant MID as Midnight Contracts
     participant ADA as Cardano L1 (ProfileNFT)
@@ -21,14 +23,18 @@ sequenceDiagram
     C->>FE: Enter profile data and SAP AI skills
     FE->>BE: Submit profile draft
     BE->>DB: Store profile draft (public metadata)
+    BE->>TLE: Notify new profile and availability
+    TLE->>DB: Record TalentSourceEvent and enrichment state
 
     %% Step 3 - Upload and Verify Credentials
     C->>FE: Upload resume and certifications
     FE->>BE: Send encrypted docs and metadata
     BE->>DB: Store encrypted docs and credential records
-    BE->>DB: Log verification request
+    BE->>DB: Log credential verification request
     BE->>BE: Run credential verification checks
     BE->>DB: Update credentials as VERIFIED or FAILED
+    BE->>REP: Send verified credentials and profile signals
+    REP->>DB: Update baseline ReputationScore for consultant
 
     %% Step 4 - Generate Proofs and Commitments
     BE->>BE: Generate hashes and proof commitments
@@ -41,6 +47,7 @@ sequenceDiagram
     BE->>ADA: Submit ProfileNFT mint transaction
     ADA-->>BE: Return transaction hash and NFT reference
     BE->>DB: Link user profile to ProfileNFT
+    BE->>REP: Notify ProfileNFT mint event for reputation graph
 
     %% Step 6 - Sync Back to Frontend
     BE-->>FE: Return ProfileNFT details and status
