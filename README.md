@@ -1,3 +1,13 @@
+# Frontend Application
+
+This folder will contain the Legeon Genesis Onboarding DApp frontend.
+
+Notes:
+- Next.js will be used
+- Wallet connection (CIP-30) lives here
+- No direct access to raw credentials or proofs
+- All sensitive operations occur via backend APIs
+
 # legeon-genesis-onboarding-compactdapp
 Open-source Genesis Onboarding CompactDApp for Legeon — a privacy-preserving consultant onboarding module built on Midnight
 # 🌐 Legeon Genesis Onboarding CompactDApp
