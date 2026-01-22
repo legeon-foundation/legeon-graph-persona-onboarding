@@ -1,3 +1,8 @@
+# Architecture Diagrams
+
+This folder contains reference diagrams and markdown explanations.
+No executable code should live here.
+
 Legeon Technical Architecture Documentation
 
 Welcome to the Legeon Architecture Repository — the technical foundation of the decentralized SAP AI consulting network.
