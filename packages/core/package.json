@@ -1,0 +1,19 @@
+{
+  "name": "@legeon/core",
+  "version": "0.1.0",
+  "description": "Domain types and interfaces for Legeon onboarding system",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./types": "./src/types/index.ts",
+    "./interfaces": "./src/interfaces/index.ts"
+  },
+  "scripts": {
+    "type-check": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  }
+}

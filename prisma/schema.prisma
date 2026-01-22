@@ -1,0 +1,328 @@
+// Prisma Schema for Legeon Genesis Onboarding DApp
+// Based on /docs/domain-schema-seed.md
+//
+// PRIVACY-FIRST DESIGN:
+// - Sensitive data (CVs, credentials) stored as encrypted blob references
+// - No PII in ProfileNFT-related tables
+// - All compliance and audit logging included
+//
+// Phase 0: Schema definition only, no migrations yet
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User
+// Represents an authenticated actor identified by a Cardano wallet
+model User {
+  id            String   @id @default(cuid())
+  walletAddress String   @unique
+  role          UserRole
+  createdAt     DateTime @default(now())
+
+  // Relations
+  profile             ConsultantProfile?
+  credentials         Credential[]
+  profileDrafts       ProfileDraft[]
+  verifications       VerificationRecord[]
+  consents            ConsentRecord[]
+  complianceStatus    ComplianceStatus?
+  externalIdentities  ExternalIdentityLink[]
+  auditLogs           AuditLog[]
+
+  @@index([walletAddress])
+  @@map("users")
+}
+
+enum UserRole {
+  CONSULTANT
+  VERIFIER
+  OPS_ADMIN
+  AUDITOR
+}
+
+// ConsultantProfile
+// Public-facing professional identity with privacy controls
+// PRIVACY: Contains ONLY non-sensitive, consultant-approved data
+model ConsultantProfile {
+  userId            String            @id
+  displayName       String?
+  publicBio         String?
+  skillTags         String[]
+  jurisdiction      String
+  onboardingStatus  OnboardingStatus
+  profileVisibility ProfileVisibility
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([jurisdiction])
+  @@index([onboardingStatus])
+  @@map("consultant_profiles")
+}
+
+enum OnboardingStatus {
+  DRAFT
+  WALLET_CONNECTED
+  CONSENT_CAPTURED
+  PROFILE_COMPLETE
+  CREDENTIALS_SUBMITTED
+  COMPLIANCE_REVIEW
+  READY_FOR_MATCHING
+  BLOCKED
+}
+
+enum ProfileVisibility {
+  PRIVATE
+  PUBLIC
+  VERIFIED_ONLY
+}
+
+// Credential
+// A submitted professional credential (CV, certification, etc.)
+// PRIVACY: Raw credential data is encrypted off-chain
+model Credential {
+  id                 String             @id @default(cuid())
+  consultantId       String
+  credentialType     CredentialType
+  issuer             String?
+  encryptedBlobRef   String // Reference to encrypted blob (NOT raw data)
+  commitmentHash     String // Cryptographic commitment for ZK proofs
+  verificationStatus VerificationStatus
+  expiresAt          DateTime?
+  submittedAt        DateTime           @default(now())
+
+  // Relations
+  consultant       User                 @relation(fields: [consultantId], references: [id], onDelete: Cascade)
+  profileDrafts    ProfileDraft[]
+  verifications    VerificationRecord[]
+  proofArtifacts   ProofArtifact[]
+
+  @@index([consultantId])
+  @@index([verificationStatus])
+  @@index([credentialType])
+  @@map("credentials")
+}
+
+enum CredentialType {
+  RESUME
+  CERTIFICATION
+  RIGHT_TO_WORK
+  TAX
+  OTHER
+}
+
+enum VerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  EXPIRED
+}
+
+// ProfileDraft
+// Unconfirmed profile data extracted from a CV
+// CRITICAL: ProfileDraft is NEVER public, requires explicit confirmation
+model ProfileDraft {
+  id                         String             @id @default(cuid())
+  consultantId               String
+  sourceCredentialId         String
+  extractedDisplayName       String?
+  extractedBio               String?
+  extractedSkillTags         String[]
+  extractedExperienceSummary String?
+  status                     ProfileDraftStatus
+  createdAt                  DateTime           @default(now())
+
+  // Relations
+  consultant       User       @relation(fields: [consultantId], references: [id], onDelete: Cascade)
+  sourceCredential Credential @relation(fields: [sourceCredentialId], references: [id], onDelete: Cascade)
+
+  @@index([consultantId])
+  @@index([sourceCredentialId])
+  @@index([status])
+  @@map("profile_drafts")
+}
+
+enum ProfileDraftStatus {
+  DRAFT
+  CONFIRMED
+  DISCARDED
+}
+
+// VerificationRecord
+// Human or automated verification action
+model VerificationRecord {
+  id               String               @id @default(cuid())
+  credentialId     String
+  verifierUserId   String
+  decision         VerificationDecision
+  notes            String?
+  decidedAt        DateTime             @default(now())
+
+  // Relations
+  credential Credential @relation(fields: [credentialId], references: [id], onDelete: Cascade)
+  verifier   User       @relation(fields: [verifierUserId], references: [id])
+
+  @@index([credentialId])
+  @@index([verifierUserId])
+  @@map("verification_records")
+}
+
+enum VerificationDecision {
+  APPROVE
+  REJECT
+}
+
+// ProofArtifact
+// Cryptographic proof or attestation reference
+// PRIVACY: Contains proof references, never raw data
+model ProofArtifact {
+  id                 String                 @id @default(cuid())
+  relatedEntityType  String // e.g., 'Credential', 'Profile'
+  relatedEntityId    String
+  proofType          ProofType
+  proofRef           String // Reference to proof in Midnight or off-chain storage
+  verificationResult ProofVerificationResult
+  generatedAt        DateTime               @default(now())
+
+  // Relations (polymorphic via relatedEntityType/Id)
+  credential Credential? @relation(fields: [relatedEntityId], references: [id], onDelete: Cascade, map: "credential_proof")
+
+  @@index([relatedEntityType, relatedEntityId])
+  @@index([proofType])
+  @@map("proof_artifacts")
+}
+
+enum ProofType {
+  CREDENTIAL_COMMITMENT
+  JURISDICTION_COMPLIANCE
+  SKILL_ATTESTATION
+  IDENTITY_LINK
+}
+
+enum ProofVerificationResult {
+  VALID
+  INVALID
+  PENDING
+}
+
+// ProfileNFT
+// On-chain pointer representing verified onboarding status
+// CRITICAL PRIVACY RULES: NO PII, NO CVs, NO jurisdictional data
+model ProfileNFT {
+  id                 String   @id @default(cuid())
+  tokenId            String   @unique
+  ownerWalletAddress String   @unique
+  metadataURI        String // IPFS/Arweave URI to non-sensitive metadata
+  commitmentRefs     String[] // Array of commitment hashes and proof references
+  mintedAt           DateTime @default(now())
+
+  @@index([ownerWalletAddress])
+  @@index([tokenId])
+  @@map("profile_nfts")
+}
+
+// ConsentRecord
+// Tracks user consent by jurisdiction
+model ConsentRecord {
+  id           String      @id @default(cuid())
+  userId       String
+  jurisdiction String
+  consentType  ConsentType
+  version      String // Version of consent policy accepted
+  acceptedAt   DateTime    @default(now())
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([jurisdiction])
+  @@map("consent_records")
+}
+
+enum ConsentType {
+  DATA_PROCESSING
+  CREDENTIAL_VERIFICATION
+  PROFILE_PUBLICATION
+  AI_EXTRACTION
+}
+
+// ComplianceStatus
+// Evaluated readiness for onboarding
+// PRIVACY: Compliance evaluated server-side only
+model ComplianceStatus {
+  id              String               @id @default(cuid())
+  consultantId    String               @unique
+  jurisdiction    String
+  status          ComplianceStatusType
+  blockingReasons String[]
+  evaluatedAt     DateTime             @default(now())
+
+  // Relations
+  consultant User @relation(fields: [consultantId], references: [id], onDelete: Cascade)
+
+  @@index([consultantId])
+  @@index([jurisdiction])
+  @@map("compliance_statuses")
+}
+
+enum ComplianceStatusType {
+  PASS
+  FAIL
+  REVIEW
+}
+
+// ExternalIdentityLink
+// Optional linkage to external platforms (e.g., Discord)
+// CONSTRAINT: Post-ProfileNFT only, non-authoritative
+model ExternalIdentityLink {
+  id                 String             @id @default(cuid())
+  consultantId       String
+  platform           ExternalPlatform
+  externalUserId     String
+  verificationMethod VerificationMethod
+  linkedAt           DateTime           @default(now())
+
+  // Relations
+  consultant User @relation(fields: [consultantId], references: [id], onDelete: Cascade)
+
+  @@unique([consultantId, platform])
+  @@index([consultantId])
+  @@map("external_identity_links")
+}
+
+enum ExternalPlatform {
+  DISCORD
+}
+
+enum VerificationMethod {
+  WALLET_SIGNATURE
+  OAUTH
+}
+
+// AuditLog
+// Immutable log of sensitive actions
+model AuditLog {
+  id           String   @id @default(cuid())
+  actorUserId  String
+  action       String
+  resourceType String
+  resourceId   String
+  timestamp    DateTime @default(now())
+  metadata     Json? // Optional JSON metadata for context
+
+  // Relations
+  actor User @relation(fields: [actorUserId], references: [id])
+
+  @@index([actorUserId])
+  @@index([resourceType, resourceId])
+  @@index([timestamp])
+  @@map("audit_logs")
+}

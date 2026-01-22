@@ -1,0 +1,17 @@
+{
+  "name": "@legeon/ai-orchestrator",
+  "version": "0.1.0",
+  "description": "AI orchestration interfaces for Legeon CV extraction (assistive only)",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "type-check": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@legeon/core": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  }
+}

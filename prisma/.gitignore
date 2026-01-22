@@ -1,0 +1,4 @@
+# Prisma artifacts
+/migrations
+*.db
+*.db-journal
