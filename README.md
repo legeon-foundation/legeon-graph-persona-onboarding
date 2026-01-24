@@ -93,7 +93,7 @@ The frontend will use **Next.js** and include:
 ## Security & privacy notes
 - No PII is stored on public chains.
 - Treat this repo as a **reference implementation**; do not deploy to production without a security review.
-- Please report security issues responsibly (see `SECURITY.md` if present, or open a private report).
+- If you believe you’ve found a security issue, please avoid posting details publicly—open an issue asking for a private channel
 
 ## Contributing
 Contributions, issues, and feature suggestions are welcome.  
@@ -103,7 +103,10 @@ Please open an **Issue** to begin collaborating.
 MIT License — see `LICENSE`.
 
 ## About Legeon
-Legeon is building a **privacy-preserving decentralized consulting network** for SAP AI—enabling enterprises and consultants to interact with trust, confidentiality, and verifiable correctness using Midnight’s privacy-enhancing technologies.
+Legeon is building a privacy-preserving decentralized consulting network for SAP AI—enabling enterprises and consultants to interact with trust, confidentiality, and verifiable correctness using Midnight’s privacy-enhancing technologies.
+
+Website: https://legeon.org
+
 
 Website: https://legeon.co (placeholder)
 
