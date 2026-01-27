@@ -2,6 +2,21 @@
 **Privacy-preserving consultant onboarding for SAP AI**  
 Catalyst Fund 15 — Midnight CompactDApps Track
 
+---
+
+## 🧭 Current Status: Phase 0.5 (Pre-Grant)
+
+Legeon is currently in **Phase 0.5**, focused solely on documentation, repository hygiene, and developer-experience setup.  
+**No production logic** (smart contracts, wallets, APIs, databases, deployments) is being implemented at this stage.
+
+This phase is designed to demonstrate organizational discipline and readiness to reviewers prior to funding approval.  
+Implementation of the full architecture will begin **after grant approval**.
+
+📄 See detailed progress: [docs/PHASE_0_5_PROGRESS.md](docs/PHASE_0_5_PROGRESS.md)
+
+---
+
+
 ## Overview
 The **Legeon Genesis Onboarding CompactDApp** is an open-source, privacy-first onboarding module designed for **SAP AI and hyperautomation consultants**.
 
@@ -12,8 +27,9 @@ This project supports Legeon’s:
 - **Phase 3: MVP (Enterprise Gateway & Private T&M Workflows)**
 
 ## Status
-🚧 **In active build (vertical-slice scaffolding).**  
-This repository contains architecture + specs + placeholders for the frontend and Compact scripts. As components become runnable, this section will be updated with setup steps and demos.
+📘 **Phase 0.5 (Pre-Grant): documentation & repo hygiene only.**  
+This repository currently contains architecture notes, specs, and placeholders.  
+There are **no runnable components** in this phase. Setup steps and demos will be added **post-approval**.
 
 ## What this CompactDApp enables (vertical slice)
 Consultants can:
