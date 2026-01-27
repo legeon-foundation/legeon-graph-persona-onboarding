@@ -9,8 +9,7 @@ Catalyst Fund 15 — Midnight CompactDApps Track
 Legeon is currently in **Phase 0.5**, focused solely on documentation, repository hygiene, and developer-experience setup.  
 **No production logic** (smart contracts, wallets, APIs, databases, deployments) is being implemented at this stage.
 
-This phase is designed to demonstrate organizational discipline and readiness to reviewers prior to funding approval.  
-Implementation of the full architecture will begin **after grant approval**.
+This phase documents scope and readiness for review. Full implementation will commence upon grant approval.
 
 📄 See detailed progress: [docs/PHASE_0_5_PROGRESS.md](docs/PHASE_0_5_PROGRESS.md)
 
