@@ -60,6 +60,7 @@ export function VerificationStep({
   onBack,
 }: VerificationStepProps) {
   const [mintPhase, setMintPhase] = useState<MintPhase>(nftResult ? 'done' : 'idle')
+  const [showTechDetails, setShowTechDetails] = useState(false)
   const verificationRan = useRef(false)
 
   // Simulate verification evaluation
@@ -87,6 +88,9 @@ export function VerificationStep({
 
   const allCompliant = complianceGates.length > 0 &&
     complianceGates.every((g) => g.status === ComplianceStatusType.PASS)
+
+  const verificationPending = verificationGates.length > 0 &&
+    verificationGates.some((g) => g.status === VerificationStatus.PENDING)
 
   const canMint = allVerified && allCompliant && !nftResult && mintPhase === 'idle'
 
@@ -162,7 +166,19 @@ export function VerificationStep({
         </ol>
       </div>
 
-      {/* Two-Panel Layout */}
+      {/* Demo note for pending verification */}
+      {!allVerified && !nftResult && (
+        <div className="flex items-start gap-2.5 rounded-lg border border-primary/15 bg-primary/5 px-4 py-3">
+          <svg className="h-4 w-4 shrink-0 text-primary mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+          </svg>
+          <p className="text-[11px] text-muted-foreground">
+            In production, verification updates automatically. In this demo, you can proceed using Demo Mode.
+          </p>
+        </div>
+      )}
+
+      {/* Two-Panel Layout — summary labels (tech details collapsed) */}
       <div className="grid gap-4 md:grid-cols-2">
         {/* On-Chain Panel */}
         <Card className="border-primary/20">
@@ -179,25 +195,18 @@ export function VerificationStep({
               </div>
             </div>
           </CardHeader>
-          <CardContent className="space-y-3 text-xs">
-            <div>
-              <p className="text-muted-foreground mb-1.5 font-medium">Commitment Hashes</p>
-              {onChainData.commitmentHashes.map((h, i) => (
-                <code key={i} className="block truncate text-[11px] text-foreground/70 font-mono mb-0.5">
-                  {h}
-                </code>
-              ))}
+          <CardContent className="space-y-2 text-xs">
+            {/* Summary labels always visible */}
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">Commitment hashes</span>
+              <Badge variant="muted" className="text-[10px]">{onChainData.commitmentHashes.length}</Badge>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">Proof references</span>
+              <Badge variant="muted" className="text-[10px]">{onChainData.proofRefs.length}</Badge>
             </div>
             <div>
-              <p className="text-muted-foreground mb-1.5 font-medium">Proof References</p>
-              {onChainData.proofRefs.map((r, i) => (
-                <code key={i} className="block truncate text-[11px] text-foreground/70 font-mono mb-0.5">
-                  {r}
-                </code>
-              ))}
-            </div>
-            <div>
-              <p className="text-muted-foreground mb-1.5 font-medium">Skill Tags</p>
+              <p className="text-muted-foreground mb-1">Skill Tags</p>
               <div className="flex flex-wrap gap-1">
                 {onChainData.skillTags.map((tag) => (
                   <Badge key={tag} variant="secondary" className="text-[10px]">
@@ -206,12 +215,35 @@ export function VerificationStep({
                 ))}
               </div>
             </div>
-            <div>
-              <p className="text-muted-foreground mb-1 font-medium">Policy ID</p>
-              <code className="block truncate text-[11px] text-foreground/70 font-mono">
-                {onChainData.policyId}
-              </code>
-            </div>
+
+            {/* Expanded technical details */}
+            {showTechDetails && (
+              <div className="space-y-2 pt-2 border-t border-border/50">
+                <div>
+                  <p className="text-muted-foreground mb-1 font-medium">Commitment Hashes</p>
+                  {onChainData.commitmentHashes.map((h, i) => (
+                    <code key={i} className="block truncate text-[11px] text-foreground/70 font-mono mb-0.5">
+                      {h}
+                    </code>
+                  ))}
+                </div>
+                <div>
+                  <p className="text-muted-foreground mb-1 font-medium">Proof References</p>
+                  {onChainData.proofRefs.map((r, i) => (
+                    <code key={i} className="block truncate text-[11px] text-foreground/70 font-mono mb-0.5">
+                      {r}
+                    </code>
+                  ))}
+                </div>
+                <div>
+                  <p className="text-muted-foreground mb-1 font-medium">Policy ID</p>
+                  <code className="block truncate text-[11px] text-foreground/70 font-mono">
+                    {onChainData.policyId}
+                  </code>
+                </div>
+              </div>
+            )}
+
             <p className="text-[11px] text-muted-foreground/60 pt-1 border-t border-border/50">
               Only cryptographic proofs and non-sensitive metadata are stored on-chain.
             </p>
@@ -233,43 +265,72 @@ export function VerificationStep({
               </div>
             </div>
           </CardHeader>
-          <CardContent className="space-y-3 text-xs">
-            <div>
-              <p className="text-muted-foreground mb-0.5 font-medium">Display Name</p>
-              <p className="text-foreground/70">{privateData.displayName}</p>
+          <CardContent className="space-y-2 text-xs">
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">Display Name</span>
+              <span className="text-foreground/70 truncate ml-2 max-w-[60%] text-right">{privateData.displayName}</span>
             </div>
-            <div>
-              <p className="text-muted-foreground mb-0.5 font-medium">Bio</p>
-              <p className="text-foreground/70 line-clamp-2">{privateData.bio}</p>
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">Jurisdiction</span>
+              <span className="text-foreground/70">{privateData.jurisdiction}</span>
             </div>
-            <div>
-              <p className="text-muted-foreground mb-0.5 font-medium">Raw CV Reference</p>
-              <code className="block truncate text-[11px] text-foreground/70 font-mono">
-                {privateData.rawCVRef}
-              </code>
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">SAP Domains</span>
+              <Badge variant="muted" className="text-[10px]">{privateData.sapDomains.length}</Badge>
             </div>
-            <div>
-              <p className="text-muted-foreground mb-0.5 font-medium">Jurisdiction</p>
-              <p className="text-foreground/70">{privateData.jurisdiction}</p>
-            </div>
-            <div>
-              <p className="text-muted-foreground mb-0.5 font-medium">SAP Domains</p>
-              <p className="text-foreground/70">{privateData.sapDomains.join(', ')}</p>
-            </div>
-            <div>
-              <p className="text-muted-foreground mb-0.5 font-medium">BTP Experience</p>
-              <p className="text-foreground/70 line-clamp-1">{privateData.btpExperience.join(', ')}</p>
-            </div>
-            <div>
-              <p className="text-muted-foreground mb-0.5 font-medium">AI Transformation Roles</p>
-              <p className="text-foreground/70">{privateData.aiTransformationRoles.join(', ')}</p>
-            </div>
+
+            {/* Expanded private details */}
+            {showTechDetails && (
+              <div className="space-y-2 pt-2 border-t border-border/50">
+                <div>
+                  <p className="text-muted-foreground mb-0.5 font-medium">Bio</p>
+                  <p className="text-foreground/70 line-clamp-2">{privateData.bio}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground mb-0.5 font-medium">Raw CV Reference</p>
+                  <code className="block truncate text-[11px] text-foreground/70 font-mono">
+                    {privateData.rawCVRef}
+                  </code>
+                </div>
+                <div>
+                  <p className="text-muted-foreground mb-0.5 font-medium">SAP Domains</p>
+                  <p className="text-foreground/70">{privateData.sapDomains.join(', ')}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground mb-0.5 font-medium">BTP Experience</p>
+                  <p className="text-foreground/70 line-clamp-1">{privateData.btpExperience.join(', ')}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground mb-0.5 font-medium">AI Transformation Roles</p>
+                  <p className="text-foreground/70">{privateData.aiTransformationRoles.join(', ')}</p>
+                </div>
+              </div>
+            )}
+
             <p className="text-[11px] text-muted-foreground/60 pt-1 border-t border-border/50">
               PII and raw data are encrypted off-chain and never exposed publicly.
             </p>
           </CardContent>
         </Card>
       </div>
+
+      {/* Show/hide technical details toggle */}
+      <button
+        type="button"
+        onClick={() => setShowTechDetails(!showTechDetails)}
+        className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors mx-auto"
+      >
+        <svg
+          className={cn('h-3.5 w-3.5 transition-transform', showTechDetails && 'rotate-180')}
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={2}
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+        </svg>
+        {showTechDetails ? 'Hide technical details' : 'Show technical details'}
+      </button>
 
       {/* Verification Gates */}
       <Card>
@@ -417,11 +478,14 @@ export function VerificationStep({
                   ? 'Awaiting Compliance...'
                   : 'Mint ProfileNFT'}
               </Button>
-              <p className="mt-2 text-[11px] text-muted-foreground text-center">
-                Mints to Cardano testnet. Contains only proofs and non-sensitive metadata.
-                <br />
-                <span className="text-muted-foreground/60">(Test environment &mdash; no real cost)</span>
-              </p>
+              <div className="mt-2 text-center space-y-0.5">
+                <p className="text-[11px] text-muted-foreground">
+                  Test environment &mdash; no real cost.
+                </p>
+                <p className="text-[10px] text-muted-foreground/50">
+                  On mainnet, minting requires a small Cardano network fee (paid in ADA).
+                </p>
+              </div>
             </div>
           )}
         </CardContent>
@@ -434,23 +498,31 @@ export function VerificationStep({
         </Button>
         <div className="flex flex-col items-end gap-2">
           <div className="flex items-center gap-2">
-            {/* Demo Mode Escape Hatch */}
-            {!nftResult && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onDemoMode}
-                className="text-muted-foreground text-xs"
-              >
-                Continue (Demo Mode)
+            {/* When minted: normal Continue */}
+            {nftResult ? (
+              <Button onClick={onNext}>
+                Continue
               </Button>
+            ) : (
+              <>
+                {/* Demo Mode — PRIMARY when verification pending or not yet minted */}
+                <Button
+                  onClick={() => {
+                    onDemoMode()
+                    onNext()
+                  }}
+                >
+                  Continue (Demo Mode)
+                </Button>
+                {/* Normal continue — disabled until minted */}
+                <Button variant="ghost" size="sm" disabled className="text-muted-foreground text-xs">
+                  Continue
+                </Button>
+              </>
             )}
-            <Button onClick={onNext} disabled={!nftResult}>
-              Continue
-            </Button>
           </div>
           {!nftResult && (
-            <p className="text-[10px] text-muted-foreground/50 max-w-[300px] text-right">
+            <p className="text-[10px] text-muted-foreground/50 max-w-[320px] text-right">
               Demo Mode skips minting and proceeds to the success screen with simulated data.
             </p>
           )}

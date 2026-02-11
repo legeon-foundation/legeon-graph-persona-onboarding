@@ -104,7 +104,7 @@ function SkillChips({
                 addTag()
               }
             }}
-            placeholder="Add a skill tag..."
+            placeholder="Type and press Enter"
             className="text-xs h-8"
           />
           <Button
@@ -346,6 +346,27 @@ export function ReviewStep({
         ))}
       </div>
 
+      {/* Pre-confirm checklist */}
+      {!isConfirmed && !showConfirmDialog && (
+        <div className="rounded-lg border border-border/50 bg-secondary/10 px-4 py-3">
+          <p className="text-xs font-medium text-foreground mb-2">Before you confirm, double-check:</p>
+          <ul className="space-y-1 text-xs text-muted-foreground">
+            <li className="flex items-center gap-2">
+              <span className={cn('h-1.5 w-1.5 rounded-full shrink-0', profileDraft['extractedDisplayName'] ? 'bg-success' : 'bg-muted-foreground/40')} />
+              Display name
+            </li>
+            <li className="flex items-center gap-2">
+              <span className={cn('h-1.5 w-1.5 rounded-full shrink-0', profileDraft['extractedBio'] ? 'bg-success' : 'bg-muted-foreground/40')} />
+              Bio
+            </li>
+            <li className="flex items-center gap-2">
+              <span className={cn('h-1.5 w-1.5 rounded-full shrink-0', profileDraft['extractedSkillTags'] ? 'bg-success' : 'bg-muted-foreground/40')} />
+              Skill tags (client-facing)
+            </li>
+          </ul>
+        </div>
+      )}
+
       {/* Confirmation Panel — becomes the sole way to proceed when open */}
       {showConfirmDialog && !isConfirmed && (
         <Card
@@ -449,7 +470,7 @@ export function ReviewStep({
               </Button>
             )}
             <Button onClick={onNext} disabled={!isConfirmed}>
-              Continue
+              {isConfirmed ? 'Continue to Verification' : 'Continue'}
             </Button>
           </div>
         </div>

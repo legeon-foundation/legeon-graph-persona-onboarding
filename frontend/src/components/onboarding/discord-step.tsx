@@ -1,7 +1,6 @@
 'use client'
 
-import { useState } from 'react'
-import Link from 'next/link'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -23,6 +22,188 @@ interface DiscordStepProps {
 
 type LinkPhase = 'idle' | 'challenge' | 'signing' | 'verifying' | 'done'
 
+/* ─── Profile Summary Modal ─── */
+function ProfileSummaryModal({
+  open,
+  onClose,
+  displayName,
+  walletAddress,
+  jurisdiction,
+  nftResult,
+  demoMode,
+  skillTags,
+}: {
+  open: boolean
+  onClose: () => void
+  displayName: string
+  walletAddress: string
+  jurisdiction: string
+  nftResult: NFTMintResult | null
+  demoMode: boolean
+  skillTags: string[]
+}) {
+  const closeRef = useRef<HTMLButtonElement>(null)
+
+  // Focus close button on open
+  useEffect(() => {
+    if (open && closeRef.current) closeRef.current.focus()
+  }, [open])
+
+  // Escape to close
+  useEffect(() => {
+    if (!open) return
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        onClose()
+      }
+    }
+    document.addEventListener('keydown', handler)
+    return () => document.removeEventListener('keydown', handler)
+  }, [open, onClose])
+
+  // Prevent background scroll
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => { document.body.style.overflow = '' }
+  }, [open])
+
+  if (!open) return null
+
+  const handleCopyWallet = async () => {
+    try {
+      await navigator.clipboard.writeText(walletAddress)
+    } catch {
+      // Fallback — noop in mock
+    }
+  }
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center"
+      role="dialog"
+      aria-label="Profile Summary"
+      aria-modal="true"
+    >
+      {/* Backdrop */}
+      <div
+        className="absolute inset-0 bg-background/80 backdrop-blur-sm"
+        onClick={onClose}
+      />
+
+      {/* Modal Content */}
+      <div className="relative z-10 w-full max-w-lg mx-4 rounded-xl border bg-card shadow-xl">
+        {/* Header */}
+        <div className="flex items-center justify-between border-b px-5 py-4">
+          <h3 className="text-base font-semibold">Profile Summary</h3>
+          <button
+            ref={closeRef}
+            type="button"
+            onClick={onClose}
+            className="rounded-md p-1 text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
+            aria-label="Close"
+          >
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="px-5 py-4 space-y-4 max-h-[70vh] overflow-y-auto">
+          {/* Fields */}
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="rounded-md border bg-secondary/20 px-3 py-2">
+              <p className="text-[11px] text-muted-foreground">Display Name</p>
+              <p className="text-sm font-medium">{displayName}</p>
+            </div>
+            <div className="rounded-md border bg-secondary/20 px-3 py-2">
+              <p className="text-[11px] text-muted-foreground">Wallet</p>
+              <div className="flex items-center gap-1">
+                <code className="text-xs font-mono truncate">{formatAddress(walletAddress)}</code>
+                <button
+                  type="button"
+                  onClick={handleCopyWallet}
+                  className="shrink-0 rounded p-0.5 text-muted-foreground hover:text-foreground transition-colors"
+                  aria-label="Copy wallet address"
+                  title="Copy wallet address"
+                >
+                  <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9.75a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div className="rounded-md border bg-secondary/20 px-3 py-2">
+              <p className="text-[11px] text-muted-foreground">Jurisdiction</p>
+              <p className="text-xs">{jurisdiction}</p>
+            </div>
+            <div className="rounded-md border bg-secondary/20 px-3 py-2">
+              <p className="text-[11px] text-muted-foreground">ProfileNFT</p>
+              {nftResult ? (
+                <code className="text-xs font-mono truncate block">{nftResult.tokenId}</code>
+              ) : (
+                <p className="text-xs text-muted-foreground italic">
+                  {demoMode ? 'Demo mode \u2014 mint later' : 'Not minted'}
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Skill tags */}
+          <div>
+            <p className="text-[11px] text-muted-foreground mb-1.5">Verified Skills</p>
+            <div className="flex flex-wrap gap-1">
+              {skillTags.slice(0, 8).map((tag) => (
+                <Badge key={tag} variant="secondary" className="text-[10px]">
+                  {tag}
+                </Badge>
+              ))}
+              {skillTags.length > 8 && (
+                <Badge variant="muted" className="text-[10px]">
+                  +{skillTags.length - 8}
+                </Badge>
+              )}
+            </div>
+          </div>
+
+          {/* On-chain vs off-chain recap */}
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="rounded-lg border border-primary/20 bg-primary/5 px-3 py-2.5">
+              <p className="text-[11px] font-semibold text-foreground mb-1">Stored on-chain</p>
+              <ul className="space-y-0.5 text-[11px] text-muted-foreground">
+                <li>Cryptographic commitment hashes</li>
+                <li>Zero-knowledge proof references</li>
+                <li>Non-sensitive skill tags</li>
+              </ul>
+            </div>
+            <div className="rounded-lg border border-warning/20 bg-warning/5 px-3 py-2.5">
+              <p className="text-[11px] font-semibold text-foreground mb-1">Stays private</p>
+              <ul className="space-y-0.5 text-[11px] text-muted-foreground">
+                <li>CV and documents (encrypted)</li>
+                <li>Personal and contact information</li>
+                <li>Jurisdiction and compliance data</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="flex justify-end border-t px-5 py-3">
+          <Button variant="secondary" size="sm" onClick={onClose}>
+            Close
+          </Button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* ─── Main Component ─── */
 export function DiscordStep({
   nftResult,
   walletAddress,
@@ -36,6 +217,7 @@ export function DiscordStep({
   onFinish,
 }: DiscordStepProps) {
   const [linkPhase, setLinkPhase] = useState<LinkPhase>(discordLinked ? 'done' : 'idle')
+  const [showSummary, setShowSummary] = useState(false)
 
   const handleLinkDiscord = async () => {
     setLinkPhase('challenge')
@@ -63,8 +245,22 @@ export function DiscordStep({
     extractionResult?.extractedDisplayName.value ||
     'Consultant'
 
+  const closeSummary = useCallback(() => setShowSummary(false), [])
+
   return (
     <div className="space-y-8">
+      {/* Profile Summary Modal */}
+      <ProfileSummaryModal
+        open={showSummary}
+        onClose={closeSummary}
+        displayName={displayName}
+        walletAddress={walletAddress}
+        jurisdiction={jurisdiction}
+        nftResult={nftResult}
+        demoMode={demoMode}
+        skillTags={skillTags}
+      />
+
       {/* Success Celebration */}
       <div className="flex flex-col items-center text-center">
         <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-success/20">
@@ -77,10 +273,10 @@ export function DiscordStep({
           Your professional profile has been created. Sensitive data stays private and encrypted &mdash; only verified proofs are shared.
         </p>
 
-        {/* Demo Mode Badge */}
+        {/* Demo Mode Badge — softened wording */}
         {demoMode && (
           <Badge variant="warning" className="mt-3 text-xs">
-            Demo Complete &mdash; minting was skipped
+            Demo Complete &mdash; minting optional
           </Badge>
         )}
       </div>
@@ -109,7 +305,9 @@ export function DiscordStep({
               {nftResult ? (
                 <code className="text-xs font-mono truncate block">{nftResult.tokenId}</code>
               ) : (
-                <p className="text-xs text-muted-foreground italic">Not minted (demo mode)</p>
+                <p className="text-xs text-muted-foreground italic">
+                  {demoMode ? 'Demo mode \u2014 mint later' : 'Not minted'}
+                </p>
               )}
             </div>
             <div className="rounded-md border bg-secondary/20 px-3 py-2 sm:col-span-2">
@@ -250,19 +448,15 @@ export function DiscordStep({
         </CardContent>
       </Card>
 
-      {/* CTAs */}
+      {/* CTAs — View Profile Summary opens modal, NOT navigation */}
       <div className="flex flex-col items-center gap-3 pt-2">
         <div className="flex items-center gap-3">
-          <Link href="/">
-            <Button size="lg">
-              View Profile Summary
-            </Button>
-          </Link>
-          <Link href="/">
-            <Button variant="outline" size="lg">
-              Edit Profile
-            </Button>
-          </Link>
+          <Button size="lg" onClick={() => setShowSummary(true)}>
+            View Profile Summary
+          </Button>
+          <Button variant="outline" size="lg" disabled>
+            Edit Profile
+          </Button>
         </div>
         <p className="text-xs text-muted-foreground">
           You can update your profile and manage credentials from the dashboard.

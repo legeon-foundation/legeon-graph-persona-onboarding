@@ -88,6 +88,9 @@ export function LandingStep({ onBegin }: LandingStepProps) {
       <p className="mt-8 text-xs text-muted-foreground/60">
         Powered by Cardano &middot; Midnight &middot; Zero-Knowledge Proofs
       </p>
+      <p className="mt-2 text-[11px] text-muted-foreground/40">
+        &copy; Legeon Foundation 2026
+      </p>
     </div>
   )
 }
