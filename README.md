@@ -1,126 +1,234 @@
-# Legeon Genesis Onboarding CompactDApp
-**Privacy-preserving consultant onboarding for SAP AI**  
-Catalyst Fund 15 — Midnight CompactDApps Track
+# 🧬 Graph Persona: Genesis Phase  
+## The Identity Anchor for the Agentic SAP Economy  
+### A Midnight-powered Gateway for the Legeon Reputation Graph
 
 ---
 
-## 🧭 Current Status: Phase 0.5 (Pre-Grant)
+## 🧭 Project Status: Phase 1 (Initial Build)
 
-Legeon is currently in **Phase 0.5**, focused solely on documentation, repository hygiene, and developer-experience setup.  
-**No production logic** (smart contracts, wallets, APIs, databases, deployments) is being implemented at this stage.
+Legeon is currently in the **Genesis Build Phase**.
 
-This phase documents scope and readiness for review. Full implementation will commence upon grant approval.
+Following the strategic pivot from the Catalyst proposal, we are actively developing the **Graph Persona** — a self-sovereign, privacy-preserving identity asset for SAP professionals globally.
 
-📄 See detailed progress: [docs/PHASE_0_5_PROGRESS.md](docs/PHASE_0_5_PROGRESS.md)
+### 🔧 Active Development Focus
+
+- Next.js 14 Frontend  
+- Midnight Selective-Disclosure Schema Design  
+- Sovereign Activation Flow  
+
+No legacy Catalyst constraints apply.  
+This is the foundational build for the Legeon ecosystem.
+
+📄 See detailed progress: `docs/PHASE_1_GENESIS_PROGRESS.md`
 
 ---
 
+# 🌐 Overview
 
-## Overview
-The **Legeon Genesis Onboarding CompactDApp** is an open-source, privacy-first onboarding module designed for **SAP AI and hyperautomation consultants**.
+The **Graph Persona** is a decentralized identity framework designed to disrupt traditional staffing models.
 
-It demonstrates how **encrypted profile attributes**, **selective disclosure**, and **zero-knowledge proofs** can enable **enterprise-safe decentralized consulting** on **Midnight**—without exposing sensitive consultant or enterprise data.
+It demonstrates how:
 
-This project supports Legeon’s:
-- **Phase 2: Privacy Core**
-- **Phase 3: MVP (Enterprise Gateway & Private T&M Workflows)**
+- 🔐 Encrypted profile attributes  
+- 🧾 Selective disclosure  
+- 🧠 Zero-knowledge proofs  
 
-## Status
-📘 **Phase 0.5 (Pre-Grant): documentation & repo hygiene only.**  
-This repository currently contains architecture notes, specs, and placeholders.  
-There are **no runnable components** in this phase. Setup steps and demos will be added **post-approval**.
+Enable enterprise-safe decentralized consulting on Midnight — without exposing sensitive consultant or enterprise data.
 
-## What this CompactDApp enables (vertical slice)
+### This project supports Legeon’s:
+
+#### 🛡 Sovereign Identity  
+Private, encrypted professional personas.
+
+#### 📊 Verifiable Reputation  
+Mapping outcomes to the Legeon Reputation Graph.
+
+#### 🤖 Agentic Integration  
+Identity anchors for SAP AI Orchestration.
+
+---
+
+# 📘 Current Status
+
+**Genesis Build Phase — Active Development**
+
+This repository contains:
+
+- Next.js 14 frontend  
+- Architectural schemas  
+- Identity logic scaffolding  
+
+We are transitioning from documentation into the functional build of the **Sovereign Activation Flow**.
+
+---
+
+# 🔑 What the Graph Persona Enables
+
 Consultants can:
-- Create **encrypted profile attributes** (3–5 fields)
-- Upload CVs **securely off-chain**
-- Generate **selective disclosure proofs** (e.g., skills, experience, eligibility)
-- Mint a **privacy-safe ProfileNFT** (**no personal data stored on-chain**)
-- Access early governance privately through **ZK-validated eligibility**
 
-**Design principle:** 100% of **PII remains off-chain**; on-chain logic validates proofs and issues certificates without revealing underlying data.
+- Create encrypted profile attributes (SAP P2P, Joule, BTP expertise)
+- Upload credentials securely off-chain
+- Generate selective disclosure proofs (e.g., specific project experience)
+- Mint a privacy-safe `ProfileNFT` (no personal data stored on-chain)
+- Access early governance privately via ZK-validated eligibility
 
-## Architecture (high level)
-### 1) Enterprise Systems (SAP / Fieldglass / Ariba / HRIS)
-All operational and personal data remains **off-chain** and governed by enterprise controls.
+---
 
-### 2) Legeon Backend (private, encrypted off-chain storage)
-Stores sensitive data and generates:
-- hashes & commitments  
-- encrypted attributes  
-- zero-knowledge proofs  
-- proof artifacts for: **profile / assignment / timesheet / invoice**
+## 🧱 Core Design Principle
 
-### 3) Midnight Confidential L1
+> **100% of PII remains off-chain.**
+
+On-chain logic:
+- Validates proofs  
+- Issues certificates  
+- Updates encrypted reputation counters  
+
+Without revealing underlying data.
+
+---
+
+# 🏗 Architecture (High-Level)
+
+## 1️⃣ Enterprise Systems (SAP / Fieldglass / Ariba / HRIS)
+
+- All operational & personal data remains off-chain  
+- Governed by enterprise security controls  
+
+## 2️⃣ Legeon Vault (Private, Encrypted Off-Chain Storage)
+
+Generates:
+- Hashes & commitments  
+- Encrypted attributes  
+- Zero-knowledge proofs  
+
+Produces proof artifacts for:
+- Profile  
+- Assignment  
+- Timesheet  
+- Invoice  
+
+## 3️⃣ Midnight Confidential L1
+
 Validates proofs privately and issues:
-- profile certificates  
-- assignment/timesheet/invoice certificates  
-- encrypted reputation counters  
-- governance logic
 
-### 4) Cardano Public L1
-Stores only **minimal metadata** (e.g., governance summaries / token actions).  
+- Profile certificates (Sovereign Activation)  
+- Assignment / timesheet / invoice certificates  
+- Encrypted reputation counters  
+- Governance eligibility logic  
+
+## 4️⃣ Cardano Public L1
+
+Stores only minimal metadata:
+
+- Governance summaries  
+- Token actions  
+
 ✅ No enterprise or consultant PII is stored on Cardano.
 
-See `/diagrams` for architecture graphics.
+📊 See `/diagrams` for architecture visuals.
 
-## Repository structure
-- `/frontend` → Next.js UI (placeholder)
-- `/compact` → CompactDApp scripts (placeholder)
-- `/docs` → Documentation & future specs
-- `/diagrams` → Architecture diagrams & UI mockups
+---
 
-## Frontend notes
-The frontend will use **Next.js** and include:
-- Wallet connection via **CIP-30**
-- No direct access to raw credentials or proofs  
-- Sensitive operations performed via backend APIs only
+# 📁 Repository Structure
 
-## Roadmap (12 weeks)
-**Weeks 1–3**
-- Architecture finalization
-- Encrypted schema
-- Compact scripts scaffolding
-- Selective disclosure design
+/frontend → Next.js 14 Sovereign Activation Wizard (Active)
+/logic → Midnight Compact scripts & ZK-proof schemas (In Design)
+/docs → Project Manifest, Brand Guidelines, Technical Specs
+/diagrams → Reputation Graph & Architecture flows
 
-**Weeks 4–6**
-- React/Next.js UI prototype
-- Lace wallet integration
-- ProfileNFT contract integration
+---
 
-**Weeks 7–9**
-- Governance gating
-- Internal pilot onboarding
-- Testing & refinement
+# 🖥 Frontend Notes
 
-**Weeks 10–12**
-- Documentation package
-- Public release packaging
-- Demo & Catalyst showcase
+Built with **Next.js 14**.
 
-## Goals & metrics
-- Onboard up to **40 Genesis Innovators** post-build
-- Deploy **3–5 encrypted profile attributes**
-- Complete **1 selective disclosure** use case
-- Deliver **1 PET-enabled Compact script**
-- Release a fully open-source implementation
+Planned integrations:
 
-## Security & privacy notes
+- CIP-30 wallet connection (Lace / Midnight compatible wallets)
+- Backend API isolation for sensitive operations
+- No direct access to raw credentials or ZK proofs from frontend
+
+All sensitive cryptographic operations occur server-side.
+
+---
+
+# 🗺 Roadmap: 2026 Genesis Cycle
+
+## Month 1
+- UI/UX finalization for Graph Persona Initialization  
+- Finalize Midnight encrypted schemas  
+- Sovereign Activation wizard scaffolding  
+
+## Month 2
+- Lace / Midnight wallet integration  
+- First mock-minting of Sovereign Personas  
+- ProfileNFT contract integration (Devnet)  
+
+## Month 3
+- Pilot onboarding of 40 Genesis Innovators  
+- Initialization of the Reputation Graph  
+- Testing & refinement  
+
+## Month 4+
+- Transition to Enterprise Gateway  
+- Private Time & Materials workflows  
+
+---
+
+# 📈 Goals & Metrics
+
+- Onboard up to **40 Genesis Innovators**
+- Deploy **5+ encrypted profile attributes** per Sovereign Persona
+- Complete 1 selective disclosure use case (Expertise Verification)
+- Establish the Reputation Anchor for the Legeon DAO
+- Path toward **$10M net worth** via tokenized equity + consulting reinvestment
+
+---
+
+# 🔐 Security & Privacy Notes
+
 - No PII is stored on public chains.
-- Treat this repo as a **reference implementation**; do not deploy to production without a security review.
-- If you believe you’ve found a security issue, please avoid posting details publicly—open an issue asking for a private channel
+- This repository is a reference implementation.
+- Do not deploy to production without formal security review.
 
-## Contributing
-Contributions, issues, and feature suggestions are welcome.  
-Please open an **Issue** to begin collaborating.
+If you believe you’ve discovered a security issue:
 
-## License
+Please **do not post details publicly.**  
+Open an Issue requesting a private disclosure channel.
+
+---
+
+# 🤝 Contributing
+
+Contributions, feature suggestions, and issues are welcome.
+
+Please open an Issue to begin collaborating.
+
+---
+
+# 📜 License
+
 MIT License — see `LICENSE`.
 
-## About Legeon
-Legeon is building a privacy-preserving decentralized consulting network for SAP AI—enabling enterprises and consultants to interact with trust, confidentiality, and verifiable correctness using Midnight’s privacy-enhancing technologies.
+---
 
+# 🌍 About Legeon
+
+From LiquidMedium to Legeon.
+
+Legeon is building a privacy-preserving decentralized consulting network for SAP AI — enabling enterprises and consultants to interact with:
+
+- Trust  
+- Confidentiality  
+- Verifiable correctness  
+
+Powered by Midnight’s privacy-enhancing technologies.
+
+---
+
+### Values
+
+**Integrity | Fairness | Ownership | Transparency**
 
 Website: https://legeon.co (placeholder)
-
 
