@@ -8,7 +8,7 @@
 
 Legeon is currently in the **Genesis Build Phase**.
 
-Following the strategic pivot from the Catalyst proposal, we are actively developing the **Graph Persona** — a self-sovereign, privacy-preserving identity asset for SAP professionals globally.
+Legeon is actively developing the Graph Persona — a self-sovereign, privacy-preserving identity asset for SAP professionals globally.
 
 ### 🔧 Active Development Focus
 

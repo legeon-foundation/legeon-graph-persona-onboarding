@@ -150,3 +150,6 @@ vite.config.ts.timestamp-*
 # pnpm
 pnpm-lock.yaml
 .pnpm-debug.log
+
+.claude/
+nul

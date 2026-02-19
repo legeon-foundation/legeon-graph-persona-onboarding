@@ -7,7 +7,7 @@
 
 This document provides a transparent progress update for the **Genesis Build Phase**.
 
-Following the pivot from the initial proposal, Legeon is now independently developing the **Graph Persona infrastructure** to support the first 40 Genesis Innovators.
+Legeon is independently developing the Graph Persona infrastructure to support onboarding Genesis Core Team members
 
 Phase 1 focuses on:
 

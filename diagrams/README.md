@@ -14,7 +14,7 @@ Midnight confidential smart contracts
 
 Cardano L1 identity and governance
 
-AI copilots & agentic automation
+AI copilots \& agentic automation
 
 Enterprise-grade integrations (SAP, EOR providers)
 
@@ -28,19 +28,19 @@ This README is the starting point for understanding how all components work toge
 
 Legeon is designed as a modular, decentralized, AI-first platform that supports:
 
-🔹 Talent onboarding & credential verification
+🔹 Talent onboarding \& credential verification
 
 Selective disclosure, encrypted documents, and Midnight-based commitments.
 
-🔹 AI-driven sourcing & matching
+🔹 AI-driven sourcing \& matching
 
 Vector embeddings, LangChain pipelines, and agentic reasoning.
 
-🔹 Secure delivery & milestone escrow
+🔹 Secure delivery \& milestone escrow
 
 Confidential performance verification using Midnight.
 
-🔹 Community governance & tokenized incentives
+🔹 Community governance \& tokenized incentives
 
 ProfileNFT identity, LEGN token rewards, and decentralized voting.
 
@@ -102,7 +102,7 @@ Credential verification
 
 Proof generation
 
-Consent & audit registry
+Consent \& audit registry
 
 Private escrow
 
@@ -159,7 +159,7 @@ Explains:
 
 Treasury flows
 
-Staking & reputation
+Staking \& reputation
 
 Reward distribution
 
@@ -195,7 +195,7 @@ This defines Legeon’s long-term automation vision.
 
 Legeon is built around five core principles:
 
-1. Integrity & Fairness
+1. Integrity \& Fairness
 
 Selective disclosure, encrypted identity, and transparent rules ensure equal opportunity.
 
@@ -228,7 +228,7 @@ TypeScript / Python microservices
 
 API Gateway + Auth
 
-Credential Verification & Proof Generator
+Credential Verification \& Proof Generator
 
 Data
 
@@ -238,7 +238,7 @@ pgvector
 
 Encrypted Blob storage
 
-Audit & consent logs
+Audit \& consent logs
 
 AI
 
@@ -246,7 +246,7 @@ LangChain pipelines
 
 Embedding models + retrieval
 
-Copilots & agentic workflows
+Copilots \& agentic workflows
 
 Custom adapters into enterprise systems
 
@@ -266,15 +266,16 @@ EOR compliance partners
 
 ⭐ 5. How to Navigate This Repository
 /docs
-   /diagrams
-      macro-architecture.md
-      platform-architecture.md
-      privacy-core-architecture.md
-      onboarding-profile-nft-flow.md
-      data-architecture.md
-      dao-token-architecture.md
-      ai-architecture.md
-   README.md   <- THIS DOCUMENT
+/diagrams
+macro-architecture.md
+platform-architecture.md
+privacy-core-architecture.md
+onboarding-profile-nft-flow.md
+data-architecture.md
+dao-token-architecture.md
+ai-architecture.md
+README.md   <- THIS DOCUMENT
+
 
 
 This structure makes it easy for contributors, auditors, and the Cardano community to explore the system.
@@ -289,7 +290,7 @@ Follow the roadmap for Phase 1 → MVP → DAO scale
 
 Use these diagrams as the reference for smart contract and backend development
 
-⭐ 7. Contact & Governance
+⭐ 7. Contact \& Governance
 
 Legeon is built by the Genesis Innovators, governed through the Legeon DAO, and powered by the Midnight + Cardano ecosystem.
 
@@ -299,4 +300,5 @@ GitHub issues
 
 Discord (Genesis Innovator channels)
 
-Catalyst proposal discussion
+
+
