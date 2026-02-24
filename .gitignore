@@ -151,5 +151,5 @@ vite.config.ts.timestamp-*
 pnpm-lock.yaml
 .pnpm-debug.log
 
+# Claude tooling
 .claude/
-nul

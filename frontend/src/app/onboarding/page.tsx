@@ -1,6 +1,6 @@
 'use client'
 
-import { useReducer } from 'react'
+import { useReducer, useEffect, useRef, useState } from 'react'
 import { Stepper } from '@/components/onboarding/stepper'
 import { LandingStep } from '@/components/onboarding/landing-step'
 import { WalletStep } from '@/components/onboarding/wallet-step'
@@ -15,9 +15,19 @@ import {
   ProfileDraftStatus,
   ConsentType,
   type WizardState,
-  type WizardAction,
-  type ExtractionResult,
 } from '@/lib/types'
+// ── Hardening features ──────────────────────────────────────────────────────
+import { wizardVault } from '@/lib/wizardVault'
+import { isDemoMode } from '@/config/demoMode'
+// ── Reducer (extracted for testability, contains back-nav fix) ───────────────
+import { wizardReducer } from '@/lib/wizardReducer'
+
+// ---------------------------------------------------------------------------
+// Constants
+// ---------------------------------------------------------------------------
+
+/** Debounce window for background vault saves (ms) */
+const AUTOSAVE_DEBOUNCE_MS = 300
 
 // ---------------------------------------------------------------------------
 // Initial State
@@ -43,155 +53,10 @@ const initialState: WizardState = {
   nftResult: null,
   discordLinked: false,
   discordUsername: null,
-  demoMode: false,
-}
-
-// ---------------------------------------------------------------------------
-// Reducer
-// ---------------------------------------------------------------------------
-
-function initDraftFromExtraction(result: ExtractionResult): Record<string, string> {
-  const draft: Record<string, string> = {}
-  const fields = [
-    result.extractedDisplayName,
-    result.extractedBio,
-    result.extractedSkillTags,
-    result.extractedExperienceSummary,
-    result.sapDomains,
-    result.btpExperience,
-    result.aiTransformationRoles,
-  ]
-  for (const field of fields) {
-    draft[field.key] = field.value
-  }
-  return draft
-}
-
-function wizardReducer(state: WizardState, action: WizardAction): WizardState {
-  switch (action.type) {
-    case 'NEXT_STEP':
-      return {
-        ...state,
-        currentStep: Math.min(state.currentStep + 1, WizardStep.DISCORD_SUCCESS) as WizardStep,
-      }
-
-    case 'PREV_STEP': {
-      const prevStep = Math.max(state.currentStep - 1, WizardStep.LANDING) as WizardStep
-
-      // If going back from review, reset draft status
-      if (state.currentStep === WizardStep.REVIEW_CONFIRM && prevStep < WizardStep.REVIEW_CONFIRM) {
-        return {
-          ...state,
-          currentStep: prevStep,
-          profileDraftStatus: ProfileDraftStatus.DRAFT,
-        }
-      }
-
-      return { ...state, currentStep: prevStep }
-    }
-
-    case 'GO_TO_STEP':
-      // Only allow navigating to completed steps
-      if (action.step < state.currentStep) {
-        return { ...state, currentStep: action.step }
-      }
-      return state
-
-    case 'SET_WALLET':
-      return {
-        ...state,
-        walletAddress: action.address,
-        walletName: action.name,
-      }
-
-    case 'DISCONNECT_WALLET':
-      return {
-        ...state,
-        walletAddress: null,
-        walletName: null,
-      }
-
-    case 'SET_JURISDICTION':
-      return { ...state, jurisdiction: action.jurisdiction }
-
-    case 'TOGGLE_CONSENT':
-      return {
-        ...state,
-        consents: {
-          ...state.consents,
-          [action.consentType]: !state.consents[action.consentType],
-        },
-      }
-
-    case 'UPLOAD_FILE':
-      return {
-        ...state,
-        uploadedFiles: [...state.uploadedFiles, action.file],
-      }
-
-    case 'REMOVE_FILE':
-      return {
-        ...state,
-        uploadedFiles: state.uploadedFiles.filter((f) => f.id !== action.fileId),
-      }
-
-    case 'SET_EXTRACTION':
-      return {
-        ...state,
-        extractionResult: action.result,
-        profileDraft: initDraftFromExtraction(action.result),
-        profileDraftStatus: ProfileDraftStatus.DRAFT,
-      }
-
-    case 'UPDATE_DRAFT_FIELD':
-      return {
-        ...state,
-        profileDraft: {
-          ...state.profileDraft,
-          [action.key]: action.value,
-        },
-      }
-
-    case 'CONFIRM_PROFILE':
-      return {
-        ...state,
-        profileDraftStatus: ProfileDraftStatus.CONFIRMED,
-      }
-
-    case 'SET_VERIFICATION':
-      return {
-        ...state,
-        verificationGates: action.gates,
-      }
-
-    case 'SET_COMPLIANCE':
-      return {
-        ...state,
-        complianceGates: action.gates,
-      }
-
-    case 'SET_NFT':
-      return {
-        ...state,
-        nftResult: action.result,
-      }
-
-    case 'LINK_DISCORD':
-      return {
-        ...state,
-        discordLinked: true,
-        discordUsername: action.username,
-      }
-
-    case 'ENABLE_DEMO_MODE':
-      return {
-        ...state,
-        demoMode: true,
-      }
-
-    default:
-      return state
-  }
+  // Pre-seed demoMode from the NEXT_PUBLIC_DEMO_MODE env flag so that
+  // the banner and verification-step demo button are always in sync.
+  demoMode: isDemoMode(),
+  profileVersionHistory: [],
 }
 
 // ---------------------------------------------------------------------------
@@ -200,6 +65,62 @@ function wizardReducer(state: WizardState, action: WizardAction): WizardState {
 
 export default function OnboardingPage() {
   const [state, dispatch] = useReducer(wizardReducer, initialState)
+  const [hydrated, setHydrated] = useState(false)
+
+  // Always-current state ref — lets beforeunload read the latest state without
+  // re-registering the listener every render.
+  const stateRef = useRef<WizardState>(state)
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // ── Hardening: vault hydration on mount ─────────────────────────────────
+  useEffect(() => {
+    wizardVault
+      .load()
+      .then((saved) => {
+        if (saved && saved.currentStep !== undefined) {
+          dispatch({ type: 'RESTORE_STATE', state: saved })
+        }
+      })
+      .catch(() => {
+        // Silently fall back to initial state
+      })
+      .finally(() => {
+        setHydrated(true)
+      })
+  }, [])
+
+  // ── Keep stateRef in sync ───────────────────────────────────────────────
+  useEffect(() => {
+    stateRef.current = state
+  })
+
+  // ── Hardening: debounced autosave ────────────────────────────────────────
+  // Fires AUTOSAVE_DEBOUNCE_MS after the last state change.
+  // Skipped before hydration completes to avoid overwriting a valid vault entry
+  // with the default initial state.
+  useEffect(() => {
+    if (!hydrated) return
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
+    saveTimerRef.current = setTimeout(() => {
+      wizardVault.save(stateRef.current).catch(() => {})
+    }, AUTOSAVE_DEBOUNCE_MS)
+  }, [state, hydrated])
+
+  // ── Hardening: best-effort flush on page unload ──────────────────────────
+  // Cancels the pending debounce and fires an immediate synchronous-ish save
+  // (encrypt → localStorage, then IDB — same pattern as onboardingVault).
+  useEffect(() => {
+    const flush = () => {
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
+      wizardVault.save(stateRef.current).catch(() => {})
+    }
+    window.addEventListener('beforeunload', flush)
+    window.addEventListener('pagehide', flush)
+    return () => {
+      window.removeEventListener('beforeunload', flush)
+      window.removeEventListener('pagehide', flush)
+    }
+  }, [])
 
   const renderStep = () => {
     switch (state.currentStep) {
@@ -242,10 +163,12 @@ export default function OnboardingPage() {
       case WizardStep.PROCESSING:
         return (
           <ProcessingStep
+            suppressAutoAdvance={state.suppressProcessingAutoAdvance ?? false}
             onComplete={(result) => {
               dispatch({ type: 'SET_EXTRACTION', result })
               dispatch({ type: 'NEXT_STEP' })
             }}
+            onBack={() => dispatch({ type: 'PREV_STEP' })}
           />
         )
 
@@ -286,7 +209,6 @@ export default function OnboardingPage() {
             onMint={(result) => dispatch({ type: 'SET_NFT', result })}
             onDemoMode={() => {
               dispatch({ type: 'ENABLE_DEMO_MODE' })
-              dispatch({ type: 'NEXT_STEP' })
             }}
             onNext={() => dispatch({ type: 'NEXT_STEP' })}
             onBack={() => dispatch({ type: 'PREV_STEP' })}

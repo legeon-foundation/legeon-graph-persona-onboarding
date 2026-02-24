@@ -2,6 +2,82 @@
 ## The Identity Anchor for the Agentic SAP Economy  
 ### A Midnight-powered Gateway for the Legeon Reputation Graph
 
+
+---
+
+
+## 🧭 Current Status: Baseline Hardening v1 (branch `baseline/hardening-v1`)
+
+The onboarding prototype is now runnable and includes four hardening features that make it stable for demos and iterative development:
+
+1. **Encrypted Local Persistence** — wizard progress is saved encrypted (AES-GCM) in IndexedDB with a localStorage fallback. Refresh or reopen the tab to resume exactly where you left off.
+2. **Off-chain Profile Versioning** — confirming a profile creates v1 with a SHA-256 commitment hash. Editing after confirmation creates v2, v3, … without requiring a re-mint.
+3. **Demo Mode Feature Flag** — controlled by `NEXT_PUBLIC_DEMO_MODE`. When `true`, a persistent amber banner is shown and Step 5 offers a "Continue (Demo Mode)" shortcut. When `false`, Step 5 blocks until verification is approved.
+4. **Centralized Privacy Policy** — `frontend/src/lib/privacyPolicy.ts` is the single source of truth for `PUBLIC_ALLOWED / PRIVATE_ONLY / RESTRICTED_NEVER_PUBLIC` field classification, used by the Step 5 panels and commitment-hash generation.
+
+---
+
+## How to run
+
+```bash
+# Install dependencies (Node ≥ 18, pnpm ≥ 8 required)
+pnpm install
+
+# Start the frontend dev server
+pnpm dev
+# or: cd frontend && pnpm dev
+
+# Open http://localhost:3000
+```
+
+## Environment variables
+
+Copy `frontend/.env.local.example` to `frontend/.env.local` and adjust:
+
+| Variable | Default | Description |
+|---|---|---|
+| `NEXT_PUBLIC_DEMO_MODE` | `false` | `true` enables demo banner + Step 5 shortcut |
+| `NEXT_PUBLIC_API_URL` | `http://localhost:3001` | Backend API base URL |
+| `NEXT_PUBLIC_CARDANO_NETWORK` | `preprod` | `mainnet \| preprod \| preview` |
+
+Restart the dev server after changing env vars.
+
+## How to reset onboarding progress
+
+Click the **Reset Onboarding** button in the step navigation bar (top of the wizard).
+This calls `vault.reset()`, which:
+- Deletes the encrypted blob from IndexedDB
+- Clears the localStorage fallback key
+- Removes the device encryption key
+- Returns the wizard to Step 1
+
+## How profile versions work (prototype)
+
+| Event | Result |
+|---|---|
+| Consultant confirms profile draft (Step 4) | ProfileVersion v1 created with SHA-256 commitment hash |
+| Consultant edits profile and saves | ProfileVersion v2 (etc.) created; mint status unchanged |
+| ProfileNFT minted | Token ID recorded; does **not** lock the profile |
+| Subsequent edits after mint | New profile versions; no re-mint required |
+
+The last three versions are displayed on Step 4 (edit view) and Step 6 (post-mint summary). Each version's commitment hash is derived from `publicInputs + privateInputs + salt` using the policy in `privacyPolicy.ts`.
+
+## Running tests
+
+```bash
+cd frontend
+pnpm test          # run all tests once
+pnpm test:watch    # watch mode
+pnpm test:coverage # with coverage report
+```
+
+Tests cover:
+- `vault.test.ts` — encryption round-trip, not-plaintext assertion, reset
+- `profileVersioning.test.ts` — deterministic hash, version increment
+- `demoMode.test.ts` — flag behaviour per env value
+- `privacyPolicy.test.ts` — invariants, unclassified field detection
+- `DemoBanner.test.tsx` — React component banner visibility
+
 ---
 
 ## 🧭 Project Status: Phase 1 (Initial Build)
@@ -20,6 +96,7 @@ No legacy Catalyst constraints apply.
 This is the foundational build for the Legeon ecosystem.
 
 📄 See detailed progress: `docs/PHASE_1_GENESIS_PROGRESS.md`
+
 
 ---
 

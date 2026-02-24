@@ -231,6 +231,25 @@ export interface PrivateData {
 }
 
 // ---------------------------------------------------------------------------
+// Profile Versioning (hardening feature)
+// Mirrors ProfileVersion from @/types/onboarding without importing it,
+// keeping lib/types.ts self-contained.
+// ---------------------------------------------------------------------------
+
+export interface WizardProfileVersion {
+  /** Sequential version number starting at 1 */
+  version: number
+  /** ISO-8601 timestamp */
+  createdAt: string
+  /** SHA-256 hex commitment hash over public + private field keys + salt */
+  commitmentHash: string
+  /** Per-version random UUID used as salt for the commitment hash */
+  salt: string
+  /** Version number this supersedes (undefined for v1) */
+  supersedesVersion?: number
+}
+
+// ---------------------------------------------------------------------------
 // Wizard State Machine
 // ---------------------------------------------------------------------------
 
@@ -258,6 +277,16 @@ export interface WizardState {
   discordUsername: string | null
   // Demo mode — set when user skips verification via "Continue (Demo Mode)"
   demoMode: boolean
+  // Profile versioning (hardening feature)
+  // Records the commit history of profile confirmations.
+  profileVersionHistory?: WizardProfileVersion[]
+  /**
+   * Set to true when the user arrives at the Processing step via back navigation.
+   * ProcessingStep will skip auto-advance and render a manual Continue button instead.
+   * Cleared automatically when SET_EXTRACTION is dispatched (i.e. when the user
+   * clicks Continue on the suppressed Processing step, or when entering normally).
+   */
+  suppressProcessingAutoAdvance?: boolean
 }
 
 export type WizardAction =
@@ -278,3 +307,5 @@ export type WizardAction =
   | { type: 'SET_NFT'; result: NFTMintResult }
   | { type: 'LINK_DISCORD'; username: string }
   | { type: 'ENABLE_DEMO_MODE' }
+  /** Hydration from encrypted vault on mount */
+  | { type: 'RESTORE_STATE'; state: WizardState }

@@ -89,9 +89,6 @@ export function VerificationStep({
   const allCompliant = complianceGates.length > 0 &&
     complianceGates.every((g) => g.status === ComplianceStatusType.PASS)
 
-  const verificationPending = verificationGates.length > 0 &&
-    verificationGates.some((g) => g.status === VerificationStatus.PENDING)
-
   const canMint = allVerified && allCompliant && !nftResult && mintPhase === 'idle'
 
   const handleMint = async () => {
@@ -106,6 +103,10 @@ export function VerificationStep({
   }
 
   // Build on-chain vs private data for display
+  // Panel content is aligned with privacyPolicy.ts field classifications:
+  //   PUBLIC_ALLOWED  → on-chain (skill tags only — non-sensitive metadata)
+  //   PRIVATE_ONLY    → off-chain (display name, bio, jurisdiction, SAP domains, etc.)
+  //   RESTRICTED_NEVER_PUBLIC → never disclosed (raw CV ref)
   const onChainData: OnChainData = {
     commitmentHashes: [generateMockHash(), generateMockHash(), generateMockHash()],
     proofRefs: [
@@ -141,13 +142,13 @@ export function VerificationStep({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight">Verification & Mint</h2>
+        <h2 className="text-2xl font-bold tracking-tight">Verification &amp; Mint</h2>
         <p className="mt-1 text-sm text-muted-foreground">
           Review what goes on-chain vs what stays private, then mint your ProfileNFT.
         </p>
       </div>
 
-      {/* Explainer — what happens next */}
+      {/* Explainer */}
       <div className="rounded-lg border border-border/50 bg-secondary/20 px-4 py-3">
         <p className="text-xs font-medium text-foreground mb-2">What happens next</p>
         <ol className="space-y-1.5 text-xs text-muted-foreground">
@@ -178,7 +179,7 @@ export function VerificationStep({
         </div>
       )}
 
-      {/* Two-Panel Layout — summary labels (tech details collapsed) */}
+      {/* Two-Panel Layout */}
       <div className="grid gap-4 md:grid-cols-2">
         {/* On-Chain Panel */}
         <Card className="border-primary/20">
@@ -196,7 +197,6 @@ export function VerificationStep({
             </div>
           </CardHeader>
           <CardContent className="space-y-2 text-xs">
-            {/* Summary labels always visible */}
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">Commitment hashes</span>
               <Badge variant="muted" className="text-[10px]">{onChainData.commitmentHashes.length}</Badge>
@@ -216,7 +216,6 @@ export function VerificationStep({
               </div>
             </div>
 
-            {/* Expanded technical details */}
             {showTechDetails && (
               <div className="space-y-2 pt-2 border-t border-border/50">
                 <div>
@@ -279,7 +278,6 @@ export function VerificationStep({
               <Badge variant="muted" className="text-[10px]">{privateData.sapDomains.length}</Badge>
             </div>
 
-            {/* Expanded private details */}
             {showTechDetails && (
               <div className="space-y-2 pt-2 border-t border-border/50">
                 <div>
@@ -498,7 +496,6 @@ export function VerificationStep({
         </Button>
         <div className="flex flex-col items-end gap-2">
           <div className="flex items-center gap-2">
-            {/* When minted: normal Continue */}
             {nftResult ? (
               <Button onClick={onNext}>
                 Continue

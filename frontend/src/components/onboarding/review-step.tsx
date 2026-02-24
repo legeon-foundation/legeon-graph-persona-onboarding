@@ -217,9 +217,7 @@ export function ReviewStep({
   const isConfirmed = profileDraftStatus === ProfileDraftStatus.CONFIRMED
   const readOnly = isConfirmed
 
-  // Panel ref for focus trap and keyboard handling
   const panelRef = useRef<HTMLDivElement>(null)
-
   const closePanel = useCallback(() => setShowConfirmDialog(false), [])
 
   // Escape key closes the panel
@@ -264,7 +262,6 @@ export function ReviewStep({
     return () => document.removeEventListener('keydown', trapFocus)
   }, [showConfirmDialog])
 
-  // Get ordered fields from extraction result
   const fields: ExtractionField[] = [
     extractionResult.extractedDisplayName,
     extractionResult.extractedBio,
@@ -367,7 +364,7 @@ export function ReviewStep({
         </div>
       )}
 
-      {/* Confirmation Panel — becomes the sole way to proceed when open */}
+      {/* Confirmation Panel */}
       {showConfirmDialog && !isConfirmed && (
         <Card
           ref={panelRef}
@@ -390,7 +387,6 @@ export function ReviewStep({
                   No blockchain transaction will occur at this step. You are confirming your profile details before verification begins.
                 </p>
 
-                {/* Checklist */}
                 <ul className="mt-3 space-y-1.5 text-xs text-muted-foreground">
                   <li className="flex items-start gap-2">
                     <svg className="h-3.5 w-3.5 text-success mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -434,7 +430,7 @@ export function ReviewStep({
                     size="sm"
                     onClick={closePanel}
                   >
-                    Go Back & Edit
+                    Go Back &amp; Edit
                   </Button>
                 </div>
 
@@ -447,14 +443,14 @@ export function ReviewStep({
         </Card>
       )}
 
-      {/* Next Step Hint — only when panel is closed and not yet confirmed */}
+      {/* Next Step Hint */}
       {!isConfirmed && !showConfirmDialog && (
         <p className="text-[11px] text-muted-foreground/60 text-center">
           Next: we&rsquo;ll run verification checks and prepare your ProfileNFT.
         </p>
       )}
 
-      {/* Navigation — hidden when confirmation panel is open */}
+      {/* Navigation */}
       {!showConfirmDialog && (
         <div className="flex items-center justify-between pt-2">
           <Button variant="ghost" onClick={onBack}>
